@@ -1,0 +1,23 @@
+#!/bin/sh
+# Attach to the "tile" session, creating a 2x2 workspace first if needed.
+# Usage: tile [directory]   (defaults to the current directory)
+session=tile
+dir=${1:-$PWD}
+win="=$session:editor"
+
+if ! tmux has-session -t "=$session" 2>/dev/null; then
+  tmux new-session -d -s "$session" -n editor -c "$dir" \; \
+    split-window -h -t "$win" -c "$dir" \; \
+    split-window -h -t "$win" -c "$dir" \; \
+    split-window -h -t "$win" -c "$dir" \; \
+    select-layout -t "$win" tiled \; \
+    select-pane -t "$win.2" \; \
+    select-pane -t "$win.1"
+fi
+
+if [ -n "$TMUX" ]; then
+  exec tmux switch-client -t "=$session"
+else
+  exec tmux attach -t "=$session"
+fi
+
